@@ -1,0 +1,69 @@
+- hosts: all
+  become: true
+  become_method: sudo
+  vars:
+    galera_cluster_name: galera_cluster
+    galera_root_password: 1
+
+  tasks:
+
+# install galera cluster package
+  - name: installing mariadb-server-galera
+    dnf:
+      name: '{{item}}'
+      state: installed
+    with_items:
+      - mariadb-server-galera
+    when: "'galera_arbitrators' in group_names"
+
+# if Firewalld is running, allow ports
+
+  - name: add active ports
+      firewalld:
+        port: '{{item}}'
+        permanent: true
+        state: enabled
+      with_items:
+        - 3306/tcp
+        - 4444/tcp
+        - 4567-4568/tcp
+      when: "'galera_arbitrators' in group_names"
+
+# reload Firewalld
+
+  - name: Reload service firewalld, in all cases
+    ansible.builtin.systemd:
+      name: firewalld
+      state: reloaded
+    when: "'galera_nodes' in group_names"
+
+# create config file for arbitrator
+
+  - name: Create grbd .cnf file
+    template:
+      src: galera-arbitrator-config.j2
+      dest: /etc/garbd.cnf
+      owner: mysql
+      group: mysql
+    when: "'galera_nodes' in group_names"
+
+# create .sh scrip for back-up
+
+  - name: Create grbd .cnf file
+    template:
+      src: back-up-script.j2
+      dest: /usr/bin/wsrep_sst_backup_mysqldump
+      owner: mysql
+      group: mysql
+    when: "'galera_nodes' in group_names"
+
+# create backup directory
+
+  - name: Create a directory if it does not exist
+    ansible.builtin.file:
+      path: /backup/temp
+      state: directory
+      owner: mysql
+      group: mysql
+      mode: '0755'
+    when: "'galera_nodes' in group_names"

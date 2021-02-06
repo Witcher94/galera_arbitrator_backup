@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# SET VARIABLES
+db_user='admin_backup'
+db_passwd='Rover123!'
+
+backup_dir='/backup'
+backup_sub_dir='temp'
+
+today=`date +"%Y%m%d"`
+backup_today="galera-mysqldump-$today.sql"
+gtid_file="gtid-$today.dat"
+
+
+# LOAD COMMON SCRIPT
+. /usr/bin/wsrep_sst_common
+
+
+# COPY CONFIGURATION FILES & SAVE GTID
+cp /etc/my.cnf $backup_dir/$backup_sub_dir/
+cp /etc/garb.cnf $backup_dir/$backup_sub_dir/
+
+echo "GTID: ${WSREP_SST_OPT_GTID}" > $backup_dir/$backup_sub_dir/$gtid_file
+
+
+# SAVE DATABASE TO DUMP FILE
+mysqldump --user="$db_user" --password="$db_passwd" \
+          --flush-logs --all-databases \
+          > $backup_dir/$backup_sub_dir/$backup_today
+
+# ARCHIVE BACK-UP FILES
+cd $backup_sub_dir
+tar -czf $backup_dir/$backup_today.tgz * --transform "s,^,$backup_today/,"

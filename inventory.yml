@@ -1,0 +1,2 @@
+[galera_arbitrators]
+haproxy_server ansible_host=192.168.10.2 ansible_port=22
