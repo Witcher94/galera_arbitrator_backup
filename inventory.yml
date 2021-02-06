@@ -2,3 +2,5 @@
 galera_node_1 ansible_host=192.168.10.2 ansible_port=22
 galera_node_2 ansible_host=192.168.10.3 ansible_port=22
 galera_node_3 ansible_host=192.168.10.4 ansible_port=22
+[galera_arbitrators]
+galera_arbitrator ansible_host=192.168.10.5 ansible_port=22
