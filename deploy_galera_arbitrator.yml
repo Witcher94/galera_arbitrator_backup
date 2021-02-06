@@ -36,15 +36,15 @@
 # if Firewalld is running, allow ports
 
   - name: add active ports
-      firewalld:
-        port: '{{item}}'
-        permanent: true
-        state: enabled
-      with_items:
-        - 3306/tcp
-        - 4444/tcp
-        - 4567-4568/tcp
-      when: "'galera_arbitrators' in group_names"
+    firewalld:
+      port: '{{item}}'
+      permanent: true
+      state: enabled
+    with_items:
+      - 3306/tcp
+      - 4444/tcp
+      - 4567-4568/tcp
+    when: "'galera_arbitrators' in group_names"
 
 # reload Firewalld
 
@@ -52,7 +52,7 @@
     ansible.builtin.systemd:
       name: firewalld
       state: reloaded
-    when: "'galera_nodes' in group_names"
+    when: "'galera_arbitrators' in group_names"
 
 # create config file for arbitrator
 
@@ -62,7 +62,7 @@
       dest: /etc/garbd.cnf
       owner: mysql
       group: mysql
-    when: "'galera_nodes' in group_names"
+    when: "'galera_arbitrators' in group_names"
 
 # create .sh scrip for back-up
 
@@ -72,7 +72,7 @@
       dest: /usr/bin/wsrep_sst_backup_mysqldump
       owner: mysql
       group: mysql
-    when: "'galera_nodes' in group_names"
+    when: "'galera_arbitrators' in group_names"
 
 # create backup directory
 
@@ -82,5 +82,5 @@
       state: directory
       owner: mysql
       group: mysql
-      mode: '0755'
-    when: "'galera_nodes' in group_names"
+      mode: '0775'
+    when: "'galera_arbitrators' in group_names"
