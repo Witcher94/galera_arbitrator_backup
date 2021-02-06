@@ -1,9 +1,26 @@
 - hosts: all
   become: true
   become_method: sudo
-  vars:
-    galera_cluster_name: galera_cluster
-    galera_root_password: 1
+  vars_prompt:
+
+        - name: galera_cluster_name
+          prompt: What is your galera_cluster_name?
+          private: no
+          default: galera_cluster
+
+        - name: galera_donor_name
+          prompt: What is your donor node name?
+          private: no
+          default: galera_node_3
+
+        - name: mysql_root_name
+          prompt: What is your mysql_root_name?
+          private: no
+          default: root
+
+        - name: mysql_root_password
+          prompt: What is your password?
+
 
   tasks:
 
